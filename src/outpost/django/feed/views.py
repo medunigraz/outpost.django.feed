@@ -9,6 +9,7 @@ from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseNotFound,
+    HttpResponseForbidden,
 )
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -74,10 +75,9 @@ class ReceiverView(APIView):
         handler = getattr(self, f"handle_{action}", None)
         if not handler:
             return HttpResponseBadRequest(_("No matching handler found"))
-        status = handler(model, entry)
-        return HttpResponse(status=status)
+        return handler(request, model, entry)
 
-    def handle_create(self, model, entry):
+    def synchronize(self, model, entry):
         defaults = dict()
         for field, value in entry.items():
             if hasattr(model, "Mapping") and (
@@ -93,23 +93,51 @@ class ReceiverView(APIView):
         obj, created = model.objects.update_or_create(pk=oid, defaults=defaults)
         if created:
             logger.info(f"Created new {model}: {obj}")
-            return 201
+            return HttpResponse(status=201)
         else:
             logger.info(f"Updated existing {model}: {obj}")
-            return 204
+            return HttpResponse(status=204)
 
-    def handle_update(self, model, entry):
-        return self.handle_create(model, entry)
+    def handle_create(self, request, model, entry):
+        if not request.user.has_perm(
+            f"{model._meta.app_label}.add_{model._meta.model_name}"
+        ):
+            return HttpResponseForbidden()
+        return self.synchronize(model, entry)
 
-    def handle_publish(self, model, entry):
-        return self.handle_create(model, entry)
+    def handle_update(self, request, model, entry):
+        if not request.user.has_perm(
+            f"{model._meta.app_label}.change_{model._meta.model_name}"
+        ):
+            return HttpResponseForbidden()
+        return self.synchronize(model, entry)
 
-    def handle_delete(self, model, entry):
+    def handle_publish(self, request, model, entry):
+        if not request.user.has_perm(
+            f"{model._meta.app_label}.change_{model._meta.model_name}"
+        ):
+            return HttpResponseForbidden()
+        return self.synchronize(model, entry)
+        return self.synchronize(model, entry)
+
+    def desynchronize(self, model, entry):
         oid = entry.get(model._meta.pk.attname)
         obj = model.objects.get(pk=oid)
         obj.delete()
         logger.info(f"Deleted {model}: {obj}")
         return 204
 
-    def handle_unpublish(self, model, entry):
-        return self.handle_delete(model, entry)
+    def handle_unpublish(self, request, model, entry):
+        if not request.user.has_perm(
+            f"{model._meta.app_label}.delete_{model._meta.model_name}"
+        ):
+            return HttpResponseForbidden()
+        return self.synchronize(model, entry)
+        return self.desynchronize(model, entry)
+
+    def handle_delete(self, request, model, entry):
+        if not request.user.has_perm(
+            f"{model._meta.app_label}.delete_{model._meta.model_name}"
+        ):
+            return HttpResponseForbidden()
+        return self.desynchronize(model, entry)

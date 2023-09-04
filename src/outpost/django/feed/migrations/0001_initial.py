@@ -7,26 +7,25 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Article',
+            name="Article",
             fields=[
-                ('id', models.IntegerField(primary_key=True, serialize=False)),
-                ('created', models.DateTimeField()),
-                ('updated', models.DateTimeField()),
-                ('published', models.DateTimeField()),
-                ('title', models.TextField()),
-                ('subtitle', models.TextField(null=True)),
-                ('teaser', models.TextField()),
-                ('body', models.TextField()),
-                ('link', models.URLField(null=True)),
-                ('image', models.URLField(null=True)),
+                ("id", models.IntegerField(primary_key=True, serialize=False)),
+                ("created", models.DateTimeField()),
+                ("updated", models.DateTimeField()),
+                ("published", models.DateTimeField()),
+                ("title", models.TextField()),
+                ("subtitle", models.TextField(null=True)),
+                ("teaser", models.TextField()),
+                ("body", models.TextField()),
+                ("link", models.URLField(null=True)),
+                ("image", models.URLField(null=True)),
             ],
             options={
-                'ordering': ('created',),
+                "ordering": ("created",),
             },
         ),
     ]
