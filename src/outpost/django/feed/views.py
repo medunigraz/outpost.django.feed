@@ -63,17 +63,21 @@ class ReceiverView(APIView):
     def post(self, request):
         uid = request.data.get("uid")
         if uid not in self.model_map:
+            logger.warn(f"Unknown model specified: {uid}")
             return HttpResponseBadRequest(_("Unknown model specified: {}").format(uid))
         model = self.model_map.get(uid)
         entry = request.data.get("entry", dict())
         if not model.can_receive(entry):
+            logger.warn("Entry is not applicable for storage")
             return HttpResponseBadRequest(_("Entry is not applicable for storage"))
         event = request.data.get("event")
         if not event:
+            logger.warn("No applicable event found")
             return HttpResponseBadRequest(_("No applicable event found"))
         etype, action = event.split(".")
         handler = getattr(self, f"handle_{action}", None)
         if not handler:
+            logger.warn(f"No matching handler found for {action}")
             return HttpResponseBadRequest(_("No matching handler found"))
         return handler(request, model, entry)
 
