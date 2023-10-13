@@ -41,7 +41,10 @@ class Article(models.Model):
 
     @classmethod
     def can_receive(cls, entry):
-        return entry.get("role", dict()).get("value") in settings.FEED_ARTICLE_ROLES
+        return (
+            entry.get("role", dict()).get("value") in settings.FEED_ARTICLE_ROLES
+            and entry.get("publishedAt") is not None
+        )
 
     class Mapping:
         @staticmethod
@@ -61,7 +64,7 @@ class Article(models.Model):
             if value:
                 return ("published", iso8601.parse_date(value))
             else:
-                return None
+                return ("published", None)
 
     def __str__(self):
         return self.title
