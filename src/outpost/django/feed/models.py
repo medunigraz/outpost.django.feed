@@ -28,11 +28,11 @@ class Article(models.Model):
     id = models.IntegerField(primary_key=True)
     created = models.DateTimeField()
     updated = models.DateTimeField()
-    published = models.DateTimeField()
+    published = models.DateTimeField(null=True)
     title = models.TextField()
     subtitle = models.TextField(null=True)
     teaser = models.TextField()
-    body = models.TextField()
+    body = models.TextField(null=True)
     link = models.URLField(null=True)
     image = models.URLField(null=True)
 
