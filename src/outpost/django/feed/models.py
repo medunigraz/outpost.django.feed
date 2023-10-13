@@ -58,7 +58,10 @@ class Article(models.Model):
 
         @staticmethod
         def publishedAt(value):
-            return ("published", iso8601.parse_date(value))
+            if value:
+                return ("published", iso8601.parse_date(value))
+            else:
+                return None
 
     def __str__(self):
         return self.title
