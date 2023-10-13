@@ -69,13 +69,14 @@ class ReceiverView(APIView):
             )
         model = self.model_map.get(model_name)
         entry = request.data.get("entry", dict())
-        if not model.can_receive(entry):
-            logger.warn("Entry is not applicable for storage")
-            return HttpResponseBadRequest(_("Entry is not applicable for storage"))
         event = request.data.get("event")
         if not event:
             logger.warn("No applicable event found")
             return HttpResponseBadRequest(_("No applicable event found"))
+        if event not in ("entry.unpublish", "entry.delete"):
+            if not model.can_receive(entry):
+                logger.warn("Entry is not applicable for storage")
+                return HttpResponseBadRequest(_("Entry is not applicable for storage"))
         etype, action = event.split(".")
         handler = getattr(self, f"handle_{action}", None)
         if not handler:
@@ -138,7 +139,6 @@ class ReceiverView(APIView):
             f"{model._meta.app_label}.delete_{model._meta.model_name}"
         ):
             return HttpResponseForbidden()
-        return self.synchronize(model, entry)
         return self.desynchronize(model, entry)
 
     def handle_delete(self, request, model, entry):
