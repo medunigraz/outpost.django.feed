@@ -57,15 +57,17 @@ class ReceiverView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     model_map = {
-        "api::infocenter-article.infocenter-article": models.Article,
+        "infocenter-article": models.Article,
     }
 
     def post(self, request):
-        uid = request.data.get("uid")
-        if uid not in self.model_map:
-            logger.warn(f"Unknown model specified: {uid}")
-            return HttpResponseBadRequest(_("Unknown model specified: {}").format(uid))
-        model = self.model_map.get(uid)
+        model_name = request.data.get("model")
+        if model_name not in self.model_map:
+            logger.warn(f"Unknown model specified: {model_name}")
+            return HttpResponseBadRequest(
+                _("Unknown model specified: {}").format(model_name)
+            )
+        model = self.model_map.get(model_name)
         entry = request.data.get("entry", dict())
         if not model.can_receive(entry):
             logger.warn("Entry is not applicable for storage")
