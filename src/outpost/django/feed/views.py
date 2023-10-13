@@ -132,7 +132,7 @@ class ReceiverView(APIView):
         obj = model.objects.get(pk=oid)
         obj.delete()
         logger.info(f"Deleted {model}: {obj}")
-        return 204
+        return HttpResponse(status=204)
 
     def handle_unpublish(self, request, model, entry):
         if not request.user.has_perm(
