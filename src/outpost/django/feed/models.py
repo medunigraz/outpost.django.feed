@@ -66,6 +66,10 @@ class Article(models.Model):
             else:
                 return ("published", None)
 
+        @staticmethod
+        def titleImage(value):
+            return ("image", value.get("url"))
+
     def __str__(self):
         return self.title
 
