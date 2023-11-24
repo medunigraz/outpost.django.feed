@@ -7,6 +7,7 @@ import requests
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import (
     ArrayField,
+    HStoreField,
     JSONField,
 )
 from django.urls import reverse
@@ -35,40 +36,47 @@ class Article(models.Model):
     body = models.TextField(null=True)
     link = models.URLField(null=True)
     image = models.URLField(null=True)
+    roles = ArrayField(models.CharField(max_length=32), null=True, blank=True)
+    flags = HStoreField(null=True, blank=True)
+    original = JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ("created",)
 
-    @classmethod
-    def can_receive(cls, entry):
-        return (
-            entry.get("role", dict()).get("value") in settings.FEED_ARTICLE_ROLES
-            and entry.get("publishedAt") is not None
-        )
-
     class Mapping:
         @staticmethod
-        def description(value):
-            return ("body", value)
+        def body(data):
+            return data.get("entry").get("description")
 
         @staticmethod
-        def createdAt(value):
-            return ("created", iso8601.parse_date(value))
+        def created(data):
+            return iso8601.parse_date(data.get("entry").get("createdAt"))
 
         @staticmethod
-        def updatedAt(value):
-            return ("updated", iso8601.parse_date(value))
+        def updated(data):
+            return iso8601.parse_date(data.get("entry").get("updatedAt"))
 
         @staticmethod
-        def publishedAt(value):
-            if value:
-                return ("published", iso8601.parse_date(value))
-            else:
-                return ("published", None)
+        def published(data):
+            date = data.get("entry").get("publishedAt")
+            if date:
+                return iso8601.parse_date(date)
 
         @staticmethod
-        def titleImage(value):
-            return ("image", value.get("url"))
+        def image(data):
+            return data.get("entry").get("titleImage").get("url")
+
+        @staticmethod
+        def roles(data):
+            return [data.get("entry").get("role").get("value")]
+
+        @staticmethod
+        def flags(data):
+            return {"kages": data.get("entry").get("exportToKAGes")}
+
+        @staticmethod
+        def original(data):
+            return data
 
     def __str__(self):
         return self.title
