@@ -1,3 +1,6 @@
+import json
+from base64 import b64encode
+
 import bs4
 from django.conf import settings
 from django.contrib.syndication.views import Feed
@@ -59,7 +62,14 @@ class ArticleFeed(FeedCache, Feed):
         return "".join([str(x) for x in bs.body.children])
 
     def item_link(self, item):
-        return settings.FEED_ARTICLE_ITEM_URL.format(blog=item)
+        payload = json.dumps(
+            {"id": item.pk, "type": "STRAPI", "localize": True}
+        ).encode("utf-8")
+        return (
+            URL(settings.FEED_ARTICLE_ITEM_URL)
+            .query_param("id", b64encode(payload).decode("utf-8"))
+            .as_string()
+        )
 
     def item_guid(self, item):
         return item.pk
@@ -68,7 +78,7 @@ class ArticleFeed(FeedCache, Feed):
         return item.published
 
     def item_updateddate(self, item):
-        return item.modified
+        return item.updated
 
     def item_enclosure_url(self, item):
         return item.get_image_url()

@@ -86,7 +86,9 @@ class Article(models.Model):
         if self.image:
             url = URL(settings.FEED_ARTICLE_IMAGE_URL).path(self.image)
             try:
-                with requests.get(url.as_string()) as resp:
+                with requests.get(
+                    url.as_string(), cookies=settings.FEED_ARTICLE_IMAGE_COOKIES
+                ) as resp:
                     resp.raise_for_status()
                     return ImageOps.exif_transpose(Image.open(BytesIO(resp.content)))
             except requests.RequestException:

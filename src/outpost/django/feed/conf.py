@@ -10,6 +10,8 @@ class FeedAppConf(AppConf):
     ARTICLE_URL = ""
     ARTICLE_ITEMS = 20
     ARTICLE_ITEM_URL = ""
+    ARTICLE_IMAGE_URL = ""
+    ARTICLE_IMAGE_HEADERS = dict()
 
     class Meta:
         prefix = "feed"

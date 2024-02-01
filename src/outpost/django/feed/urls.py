@@ -11,7 +11,7 @@ from . import (
 app_name = "feed"
 
 urlpatterns = [
-    path("article/feed.atom", feeds.ArticleFeed()),
+    path("article/atom", feeds.ArticleFeed()),
     path(
         "image/<str:name>/<int:pk>",
         views.ImageView.as_view(),
