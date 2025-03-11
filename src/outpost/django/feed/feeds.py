@@ -39,10 +39,13 @@ class ArticleFeed(FeedCache, Feed):
     item_guid_is_permalink = False
     item_enclosure_mime_type = "image/webp"
 
-    def items(self):
-        return models.Article.objects.all().order_by("-published")[
-            : settings.FEED_ARTICLE_ITEMS
-        ]
+    def get_object(self, request, pk):
+        return models.Consumer.objects.get(pk=pk)
+
+    def items(self, obj):
+        return models.Article.objects.filter(roles__overlap=obj.roles).order_by(
+            "-published"
+        )[: settings.FEED_ARTICLE_ITEMS]
 
     def item_title(self, item):
         bs = bs4.BeautifulSoup(item.title, "lxml")

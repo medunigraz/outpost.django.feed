@@ -1,4 +1,5 @@
 import logging
+import uuid
 from io import BytesIO
 
 import iso8601
@@ -100,3 +101,12 @@ class Article(models.Model):
                 "feed:image",
                 kwargs={"name": self.__class__.__name__, "pk": self.pk},
             )
+
+
+class Consumer(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=256)
+    roles = ArrayField(models.CharField(max_length=32), null=True, blank=True)
+
+    def __str__(self):
+        return self.name
