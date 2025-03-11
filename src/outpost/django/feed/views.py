@@ -1,9 +1,5 @@
 import logging
 
-from braces.views import (
-    CsrfExemptMixin,
-    LoginRequiredMixin,
-)
 from django.apps import apps
 from django.http import (
     HttpResponse,

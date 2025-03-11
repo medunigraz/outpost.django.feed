@@ -1,5 +1,4 @@
 import logging
-from functools import partial
 from io import BytesIO
 
 import iso8601
@@ -11,7 +10,6 @@ from django.contrib.postgres.fields import (
     JSONField,
 )
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from memoize import memoize
 from PIL import (
     Image,

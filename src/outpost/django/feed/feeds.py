@@ -5,7 +5,6 @@ import bs4
 from django.conf import settings
 from django.contrib.syndication.views import Feed
 from django.core.cache import cache
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from purl import URL
 
@@ -57,7 +56,7 @@ class ArticleFeed(FeedCache, Feed):
         for e in bs.find_all(True, {"href": True}):
             href = URL(e.attrs.get("href"))
             if not href.scheme():
-                url = base_url.path(URL(e.attrs.get("href")).path())
+                url = base_url.path(href.path())
                 e.attrs["href"] = url.as_string()
         return "".join([str(x) for x in bs.body.children])
 
