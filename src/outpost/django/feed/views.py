@@ -78,6 +78,8 @@ class ReceiverView(APIView):
     def synchronize(self, model, data):
         defaults = dict()
         entry = data.get("entry", {})
+        if not entry.get("publishedAt"):
+            return HttpResponse("Entry not published yet", status=400)
         for field in model._meta.fields:
             if hasattr(model, "Mapping") and (
                 converter := getattr(model.Mapping, field.attname, None)
