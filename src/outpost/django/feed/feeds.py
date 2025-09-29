@@ -42,8 +42,8 @@ class ArticleFeed(FeedCache, Feed):
     def get_object(self, request, pk):
         return models.Consumer.objects.get(pk=pk)
 
-    def items(self, obj):
-        return models.Article.objects.filter(roles__overlap=obj.roles).order_by(
+    def items(self):
+        return models.Article.objects.filter(published__isnull=False).order_by(
             "-published"
         )[: settings.FEED_ARTICLE_ITEMS]
 
