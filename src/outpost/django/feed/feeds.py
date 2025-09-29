@@ -43,9 +43,9 @@ class ArticleFeed(FeedCache, Feed):
         return models.Consumer.objects.get(pk=pk)
 
     def items(self, obj):
-        return models.Article.objects.filter(roles__overlap=obj.roles).order_by(
-            "-published"
-        )[: settings.FEED_ARTICLE_ITEMS]
+        return models.Article.objects.filter(
+            published__isnull=False, roles__overlap=obj.roles
+        ).order_by("-published")[: settings.FEED_ARTICLE_ITEMS]
 
     def item_title(self, item):
         bs = bs4.BeautifulSoup(item.title, "lxml")
