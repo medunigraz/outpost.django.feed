@@ -61,7 +61,11 @@ class ArticleFeed(FeedCache, Feed):
             if not href.scheme():
                 url = base_url.path(href.path())
                 e.attrs["href"] = url.as_string()
-        return "".join([str(x) for x in bs.body.children])
+        body = "".join([str(x) for x in bs.body.children])
+        if not item.subtitle:
+            return body
+        subtitle = bs4.BeautifulSoup(item.subtitle, "lxml").text
+        return f"<p>{subtitle}</p>\n{body}"
 
     def item_link(self, item):
         payload = json.dumps(
