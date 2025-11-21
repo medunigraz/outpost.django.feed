@@ -7,7 +7,6 @@ from django.contrib.gis.db import models
 from django.contrib.postgres.fields import (
     ArrayField,
     HStoreField,
-    JSONField,
 )
 from django.urls import reverse
 from memoize import memoize
@@ -36,7 +35,7 @@ class Article(models.Model):
     image = models.URLField(null=True)
     roles = ArrayField(models.CharField(max_length=32), null=True, blank=True)
     flags = HStoreField(null=True, blank=True)
-    original = JSONField(null=True, blank=True)
+    original = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ("created",)
