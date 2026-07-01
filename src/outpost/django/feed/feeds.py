@@ -39,10 +39,13 @@ class ArticleFeed(FeedCache, Feed):
     item_guid_is_permalink = False
     item_enclosure_mime_type = "image/webp"
 
-    def items(self):
-        return models.Article.objects.all().order_by("-published")[
-            : settings.FEED_ARTICLE_ITEMS
-        ]
+    def get_object(self, request, pk):
+        return models.Consumer.objects.get(pk=pk)
+
+    def items(self, obj):
+        return models.Article.objects.filter(
+            published__isnull=False, roles__overlap=obj.roles
+        ).order_by("-published")[: settings.FEED_ARTICLE_ITEMS]
 
     def item_title(self, item):
         bs = bs4.BeautifulSoup(item.title, "lxml")
@@ -58,7 +61,11 @@ class ArticleFeed(FeedCache, Feed):
             if not href.scheme():
                 url = base_url.path(href.path())
                 e.attrs["href"] = url.as_string()
-        return "".join([str(x) for x in bs.body.children])
+        body = "".join([str(x) for x in bs.body.children])
+        if not item.subtitle:
+            return body
+        subtitle = bs4.BeautifulSoup(item.subtitle, "lxml").text
+        return f"<p>{subtitle}</p>\n{body}"
 
     def item_link(self, item):
         payload = json.dumps(
