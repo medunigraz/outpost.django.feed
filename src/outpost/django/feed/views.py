@@ -122,7 +122,7 @@ class ReceiverView(APIView):
 
     def desynchronize(self, model, data):
         oid = data.get("entry").get(model._meta.pk.attname)
-        obj = model.objects.get(pk=oid)
+        obj = get_object_or_404(model, pk=oid)
         obj.delete()
         logger.info(f"Deleted {model}: {obj}")
         return HttpResponse(status=204)
