@@ -62,15 +62,23 @@ class Article(models.Model):
 
         @staticmethod
         def image(data):
-            return data.get("entry").get("titleImage").get("url")
+            image = data.get("entry").get("titleImage")
+            if image:
+                return image.get("url")
 
         @staticmethod
         def roles(data):
-            return [data.get("entry").get("role").get("value")]
+            role = data.get("entry").get("role")
+            if not role:
+                return []
+            return [role.get("value")]
 
         @staticmethod
         def flags(data):
-            return {"kages": data.get("entry").get("exportToKAGes")}
+            return {
+                "kages": data.get("entry").get("exportToKAGes", False),
+                "studo": data.get("entry").get("exportToStudo", False),
+            }
 
         @staticmethod
         def original(data):
